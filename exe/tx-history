@@ -1,3 +1,7 @@
 #!/usr/bin/env ruby
 
-require "tx_history"
+# frozen_string_literal: true
+
+require 'tx_history/cli'
+
+exit(TxHistory::Cli.call($stdout, $stderr, ARGV))

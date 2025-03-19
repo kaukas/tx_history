@@ -1,0 +1,17 @@
+plugins:
+  - rubocop-rake
+  - rubocop-rspec
+  - rubocop-factory_bot
+
+AllCops:
+  NewCops: enable
+
+Layout/LineLength:
+  Max: 120
+  AutoCorrect: true
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Max: 50
