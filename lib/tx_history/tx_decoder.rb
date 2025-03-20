@@ -12,8 +12,8 @@ class TxHistory
       if method_id.nil? || method_id.empty? || method_id == '0x'
         { asset: 'ETH', wei: Integer(trx[:value]) }
       else
-        { methodId: method_id, functionName: trx[:functionName],
-          asset: 'FT' }.merge(naive_parse_input(method_id, trx[:functionName], trx[:input]))
+        { methodId: method_id,
+          functionName: trx[:functionName] }.merge(naive_parse_input(method_id, trx[:functionName], trx[:input]))
       end
     end
 
@@ -23,12 +23,12 @@ class TxHistory
       # ERC-20: transfer(address _to, uint256 _value)
       when /^0xa9059cbb([a-f0-9]{64})([a-f0-9]{64})$/
         to, value = Regexp.last_match[1..]
-        { to: "0x#{to[-40..]}", wei: Integer("0x#{value}") }
+        { to: "0x#{to[-40..]}", wei: Integer("0x#{value}"), asset: 'FT' }
 
       # ERC-20: transferFrom(address _from, address _to, uint256 _value)
       when /^0x23b872dd([a-f0-9]{64})([a-f0-9]{64})([a-f0-9]{64})$/
         from, to, value = Regexp.last_match[1..]
-        { from: "0x#{from[-40..]}", to: "0x#{to[-40..]}", wei: Integer("0x#{value}") }
+        { from: "0x#{from[-40..]}", to: "0x#{to[-40..]}", wei: Integer("0x#{value}"), asset: 'FT' }
 
       else
         {}

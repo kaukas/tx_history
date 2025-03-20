@@ -27,11 +27,10 @@ class TxHistory
       ].compact
       addresses << 'to itself' if addresses.empty?
 
-      format(
-        '%<block>010d %<addresses>s %<eth>s %<asset>s',
-        block: tx[:blockNumber], addresses: addresses.join(' '), eth: (tx[:wei].to_d / ETH_MULT).to_s('F'),
-        asset: tx[:asset]
-      )
+      eth = (tx[:wei].to_d / ETH_MULT).to_s('F')
+      eth = 'unknown' if tx[:asset].nil?
+
+      [format('%010d', tx[:blockNumber]), addresses, eth, tx[:asset]].compact.join(' ')
     end
   end
 end

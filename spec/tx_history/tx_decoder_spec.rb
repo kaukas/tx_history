@@ -28,4 +28,11 @@ RSpec.describe TxHistory::TxDecoder do
                  functionName: 'transferFrom(address _from, address _to, uint256 _value)', asset: 'FT', wei: 20 })
     end
   end
+
+  it 'returns no wei nor asset when transaction not recognized' do
+    expect(decode(attributes_for(:erc20_transfer).merge(input: '0xdeadbeef')))
+      .to eq({ blockNumber: 42, from: '0xffffffffffffffffffffffffffffffffffffffff',
+               to: '0x7777777777777777777777777777777777777777', methodId: '0xa9059cbb',
+               functionName: 'transfer(address _to, uint256 _value)' })
+  end
 end

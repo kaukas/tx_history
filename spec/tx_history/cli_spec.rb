@@ -5,6 +5,8 @@ require 'etherscan_stub'
 require 'tx_history/cli'
 
 RSpec.describe TxHistory::Cli do
+  subject(:invoke) { described_class.call(stdout, stderr, ['0xffffffffffffffffffffffffffffffffffffffff']) }
+
   let(:stdout) { StringIO.new }
   let(:stderr) { StringIO.new }
 
@@ -12,7 +14,7 @@ RSpec.describe TxHistory::Cli do
 
   it 'lists transactions for a wallet address' do
     EtherscanStub.stub_search(attributes_for(:eth))
-    code = described_class.call(stdout, stderr, ['0xffffffffffffffffffffffffffffffffffffffff'])
+    code = invoke
     expect(code).to eq(0)
     expect(stdout.string).to eq("0000000042 to 0x7777777777777777777777777777777777777777 0.00000000000000001 ETH\n")
   end
@@ -26,24 +28,29 @@ RSpec.describe TxHistory::Cli do
   it 'recognizes when the from and to wallet addresses match the queried one' do
     EtherscanStub.stub_search(attributes_for(:eth, from: '0xffffffffffffffffffffffffffffffffffffffff',
                                                    to: '0xffffffffffffffffffffffffffffffffffffffff'))
-    code = described_class.call(stdout, stderr, ['0xffffffffffffffffffffffffffffffffffffffff'])
-    expect(code).to eq(0)
+    invoke
     expect(stdout.string).to eq("0000000042 to itself 0.00000000000000001 ETH\n")
   end
 
   describe 'ERC-20' do
     it 'recognizes token transfers to another address' do
       EtherscanStub.stub_search(attributes_for(:erc20_transfer))
-      described_class.call(stdout, stderr, ['0xffffffffffffffffffffffffffffffffffffffff'])
+      invoke
       expect(stdout.string).to eq("0000000042 to 0x2222222222222222222222222222222222222222 0.00000000000000002 FT\n")
     end
 
     it 'recognizes token transfers from another address' do
       EtherscanStub.stub_search(attributes_for(:erc20_transfer_from))
-      described_class.call(stdout, stderr, ['0xffffffffffffffffffffffffffffffffffffffff'])
+      invoke
       expect(stdout.string).to eq(
         "0000000042 from 0x1111111111111111111111111111111111111111 to 0x2222222222222222222222222222222222222222 0.00000000000000002 FT\n"
       )
     end
+  end
+
+  it 'passes some fields through for unrecognized transactions' do
+    EtherscanStub.stub_search(attributes_for(:erc20_transfer).merge(input: '0xdeadbeef'))
+    invoke
+    expect(stdout.string).to eq("0000000042 to 0x7777777777777777777777777777777777777777 unknown\n")
   end
 end
