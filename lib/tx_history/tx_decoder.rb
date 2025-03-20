@@ -29,6 +29,9 @@ class TxHistory
       when /^0x23b872dd([a-f0-9]{64})([a-f0-9]{64})([a-f0-9]{64})$/
         from, to, value = Regexp.last_match[1..]
         { from: "0x#{from[-40..]}", to: "0x#{to[-40..]}", wei: Integer("0x#{value}") }
+
+      else
+        {}
       end
     end
   end

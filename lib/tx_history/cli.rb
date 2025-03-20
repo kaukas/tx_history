@@ -16,22 +16,22 @@ class TxHistory
       end
 
       tx_history = TxHistory.new(ENV.fetch('ETHERSCAN_API_KEY')).query(wallet)
-      tx_history.each do |tx|
-        # FIXME
-        from_to, other_wallet = if tx[:to] == wallet
-                                  ['from', tx[:from]]
-                                else
-                                  ['to', tx[:to]]
-                                end
-        stdout.puts(
-          format(
-            '%<block>010d %<from_to>s %<other>s %<eth>s %<unit>s',
-            block: tx[:blockNumber], from_to:, other: other_wallet, eth: (tx[:wei].to_d / ETH_MULT).to_s('F'),
-            unit: 'ETH'
-          )
-        )
-      end.join
+      tx_history.each { |tx| stdout.puts(format_transaction(wallet, tx)) }
       0
+    end
+
+    def self.format_transaction(wallet, tx)
+      addresses = [
+        tx[:from] == wallet ? nil : "from #{tx[:from]}",
+        tx[:to] == wallet ? nil : "to #{tx[:to]}"
+      ].compact
+      addresses << 'to itself' if addresses.empty?
+
+      format(
+        '%<block>010d %<addresses>s %<eth>s %<asset>s',
+        block: tx[:blockNumber], addresses: addresses.join(' '), eth: (tx[:wei].to_d / ETH_MULT).to_s('F'),
+        asset: tx[:asset]
+      )
     end
   end
 end
