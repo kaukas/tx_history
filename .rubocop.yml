@@ -10,6 +10,9 @@ Layout/LineLength:
   Max: 120
   AutoCorrect: true
 
+Metrics/MethodLength:
+  Max: 20
+
 RSpec/MultipleExpectations:
   Enabled: false
 

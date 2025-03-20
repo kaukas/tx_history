@@ -19,6 +19,26 @@ RSpec.describe TxHistory::Cli do
     expect(stdout.string).to eq("0000000042 to 0x7777777777777777777777777777777777777777 0.00000000000000001 ETH\n")
   end
 
+  it 'prints transactions as json' do
+    EtherscanStub.stub_search(attributes_for(:erc20_transfer))
+    described_class.call(stdout, stderr, ['--format', 'json', '0xffffffffffffffffffffffffffffffffffffffff'])
+    expect(JSON.parse(stdout.string)).to eq(
+      [{
+        'blockNumber' => 42,
+        'from' => '0xffffffffffffffffffffffffffffffffffffffff', 'to' => '0x2222222222222222222222222222222222222222',
+        'methodId' => '0xa9059cbb', 'functionName' => 'transfer(address _to, uint256 _value)',
+        'wei' => 20, 'asset' => 'FT'
+      }]
+    )
+  end
+
+  it 'fails on unknown format' do
+    EtherscanStub.stub_search(attributes_for(:eth))
+    code = described_class.call(stdout, stderr, ['--format', 'csv', '0xffffffffffffffffffffffffffffffffffffffff'])
+    expect(code).to eq(1)
+    expect(stderr.string).to eq("Invalid format, expected text or json\n")
+  end
+
   it 'recognizes when the from and to wallet addresses match the queried one' do
     EtherscanStub.stub_search(attributes_for(:eth, from: '0xffffffffffffffffffffffffffffffffffffffff',
                                                    to: '0xffffffffffffffffffffffffffffffffffffffff'))
@@ -37,7 +57,8 @@ RSpec.describe TxHistory::Cli do
       EtherscanStub.stub_search(attributes_for(:erc20_transfer_from))
       invoke
       expect(stdout.string).to eq(
-        "0000000042 from 0x1111111111111111111111111111111111111111 to 0x2222222222222222222222222222222222222222 0.00000000000000002 FT\n"
+        '0000000042 from 0x1111111111111111111111111111111111111111 to 0x2222222222222222222222222222222222222222 ' \
+        "0.00000000000000002 FT\n"
       )
     end
   end
@@ -51,9 +72,11 @@ RSpec.describe TxHistory::Cli do
   it 'prints help on --help' do
     code = described_class.call(stdout, stderr, ['--help'])
     expect(code).to eq(0)
-    expect(stdout.string).to eq(
-      "Usage: tx_history [options] WALLET_ADDRESS\n    -h, --help                       Prints this help\n"
-    )
+    expect(stdout.string).to eq(<<~HELP)
+      Usage: tx_history [options] WALLET_ADDRESS
+          -f, --format text|json           Output format
+          -h, --help                       Prints this help
+    HELP
   end
 
   it 'prints help on -h' do
