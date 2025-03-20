@@ -1,28 +1,42 @@
 # TxHistory
 
-TODO: Delete this and the text below, and describe your gem
+This gem provides a command-line tool to get the transaction history of a wallet address. The implementation is rather naive:
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/tx_history`. To experiment with that code, run `bin/console` for an interactive prompt.
+- Up to 10.000 transactions are fetched from Etherscan API (no pagination).
+- Only a few most common types of transactions are recognized (more to be implemented):
+    - An ether transfer.
+    - An ERC20 token transfer.
+- The contract implementations are not resolved nor executed; their parameters are used to infer the from and to addresses, and the amount of tokens transferred. This is very naive and incomplete.
 
 ## Installation
-
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
 
 Install the gem and add to the application's Gemfile by executing:
 
 ```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+bundle add https://github.com/kaukas/tx_history
 ```
 
 If bundler is not being used to manage dependencies, install the gem by executing:
 
 ```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+gem install https://github.com/kaukas/tx_history
 ```
 
 ## Usage
 
-TODO: Write usage instructions here
+Specify a wallet address to get the transaction history:
+
+```sh
+bundle exec tx_history 0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae
+```
+
+This command expects an Etherscan API key in the `ETHERSCAN_API_KEY` environment variable.
+
+Transactions can be printed in JSON format, too:
+
+```sh
+bundle exec tx_history --format json 0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae
+```
 
 ## Development
 
@@ -32,4 +46,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/tx_history.
+Bug reports and pull requests are welcome on GitHub at [https://github.com/kaukas/tx\_history](https://github.com/kaukas/tx_history).
