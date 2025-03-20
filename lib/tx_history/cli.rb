@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'optparse'
 require 'bigdecimal/util'
 require_relative 'tx_history'
 
@@ -8,11 +9,19 @@ class TxHistory
   module Cli
     ETH_MULT = 10.to_d**18.to_d
 
-    def self.call(stdout, stderr, args)
-      wallet = args[0]
-      if wallet.nil? || wallet.empty?
-        stderr.puts('Missing wallet address')
-        return 1
+    def self.call(stdout, _stderr, args)
+      help = false
+      parser = OptionParser.new do |opts|
+        opts.banner = 'Usage: tx_history [options] WALLET_ADDRESS'
+        opts.on('-h', '--help', 'Prints this help') do
+          help = true
+        end
+      end
+
+      wallet, = parser.parse(args)
+      if help || wallet.nil? || wallet.empty?
+        stdout.puts(parser)
+        return 0
       end
 
       tx_history = TxHistory.new(ENV.fetch('ETHERSCAN_API_KEY')).query(wallet)

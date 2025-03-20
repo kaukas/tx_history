@@ -19,12 +19,6 @@ RSpec.describe TxHistory::Cli do
     expect(stdout.string).to eq("0000000042 to 0x7777777777777777777777777777777777777777 0.00000000000000001 ETH\n")
   end
 
-  it 'requires a wallet address' do
-    code = described_class.call(stdout, stderr, [])
-    expect(code).to eq(1)
-    expect(stderr.string).to eq("Missing wallet address\n")
-  end
-
   it 'recognizes when the from and to wallet addresses match the queried one' do
     EtherscanStub.stub_search(attributes_for(:eth, from: '0xffffffffffffffffffffffffffffffffffffffff',
                                                    to: '0xffffffffffffffffffffffffffffffffffffffff'))
@@ -52,5 +46,32 @@ RSpec.describe TxHistory::Cli do
     EtherscanStub.stub_search(attributes_for(:erc20_transfer).merge(input: '0xdeadbeef'))
     invoke
     expect(stdout.string).to eq("0000000042 to 0x7777777777777777777777777777777777777777 unknown\n")
+  end
+
+  it 'prints help on --help' do
+    code = described_class.call(stdout, stderr, ['--help'])
+    expect(code).to eq(0)
+    expect(stdout.string).to eq(
+      "Usage: tx_history [options] WALLET_ADDRESS\n    -h, --help                       Prints this help\n"
+    )
+  end
+
+  it 'prints help on -h' do
+    code = described_class.call(stdout, stderr, ['-h'])
+    expect(code).to eq(0)
+    expect(stdout.string.lines[0]).to eq("Usage: tx_history [options] WALLET_ADDRESS\n")
+  end
+
+  it 'prints help on no arguments' do
+    # Prints help when no arguments are given.
+    code = described_class.call(stdout, stderr, [])
+    expect(code).to eq(0)
+    expect(stdout.string.lines[0]).to eq("Usage: tx_history [options] WALLET_ADDRESS\n")
+  end
+
+  it 'ignores other arguments on --help' do
+    code = described_class.call(stdout, stderr, ['--help', '0xffffffffffffffffffffffffffffffffffffffff'])
+    expect(code).to eq(0)
+    expect(stdout.string.lines[0]).to eq("Usage: tx_history [options] WALLET_ADDRESS\n")
   end
 end
